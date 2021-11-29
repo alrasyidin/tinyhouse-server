@@ -1,0 +1,5 @@
+{
+    "parser": "typescript",
+    "endOfLine": "lf",
+    "tabWidth": 2
+}
