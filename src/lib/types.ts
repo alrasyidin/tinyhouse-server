@@ -5,6 +5,14 @@ export enum ListingType {
   House = "HOUSE",
 }
 
+export interface Viewer {
+  _id?: string;
+  token?: string;
+  avatar?: string;
+  walletId?: string;
+  didRequest: boolean;
+}
+
 export interface BookingsIndexMonth {
   [key: string]: boolean;
 }
