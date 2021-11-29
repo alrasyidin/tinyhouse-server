@@ -9,6 +9,7 @@
     },
     "exclude": [
         "node_modules",
-        "temp/seed.ts"
+        "temp/seed.ts",
+        "temp/clear.ts"
     ],
 }
