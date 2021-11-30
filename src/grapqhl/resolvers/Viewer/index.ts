@@ -4,11 +4,20 @@ import { IResolvers } from ".pnpm/graphql-tools@4.0.8_graphql@14.7.0/node_module
 import { Google } from "../../../lib/api";
 import { Database, User, Viewer } from "../../../lib/types";
 import { LogInArgs } from "./types";
+import { Request, Response } from "express";
+
+const cookiOptions = {
+  httpOnly: true,
+  sameSite: true,
+  signed: true,
+  secure: process.env.NODE_ENV === "development" ? false : true,
+};
 
 const logInViaGoogle = async (
   code: string,
   token: string,
-  db: Database
+  db: Database,
+  res: Response
 ): Promise<User | undefined> => {
   const { user } = await Google.login(code);
 
@@ -16,7 +25,7 @@ const logInViaGoogle = async (
     throw new Error("Google Login Error");
   }
 
-  console.log(user);
+  // console.log(user);
 
   // Name, Photo and Email list
   const userNamesList = user.names && user.names.length ? user.names : null;
@@ -52,7 +61,6 @@ const logInViaGoogle = async (
       returnOriginal: false,
     }
   );
-
   let viewer = updateRes.value;
 
   if (!viewer) {
@@ -70,8 +78,43 @@ const logInViaGoogle = async (
     viewer = insertRes.ops[0];
   }
 
+  res.cookie("viewer", userId, {
+    ...cookiOptions,
+    maxAge: 365 * 24 * 60 * 60 * 1000,
+  });
+
   return viewer;
 };
+
+const logInViaCookie = async (
+  token: string,
+  db: Database,
+  req: Request,
+  res: Response
+): Promise<User | undefined> => {
+  const updateRes = await db.users.findOneAndUpdate(
+    {
+      _id: req.signedCookies.viewer,
+    },
+    {
+      $set: {
+        token,
+      },
+    },
+    {
+      returnOriginal: false,
+    }
+  );
+
+  const viewer = updateRes.value;
+
+  if (!viewer) {
+    res.clearCookie("viewer", cookiOptions);
+  }
+
+  return viewer;
+};
+
 export const viewerResolvers: IResolvers = {
   Query: {
     authUrl: (): string => {
@@ -86,15 +129,15 @@ export const viewerResolvers: IResolvers = {
     logIn: async (
       _root: undefined,
       { input }: LogInArgs,
-      { db }: { db: Database }
+      { db, req, res }: { db: Database; req: Request; res: Response }
     ): Promise<Viewer> => {
       try {
         const code = input ? input.code : null;
         const token = crypto.randomBytes(16).toString("hex");
 
         const viewer: User | undefined = code
-          ? await logInViaGoogle(code, token, db)
-          : undefined;
+          ? await logInViaGoogle(code, token, db, res)
+          : await logInViaCookie(token, db, req, res);
 
         if (!viewer) {
           return { didRequest: true };
@@ -111,8 +154,13 @@ export const viewerResolvers: IResolvers = {
         throw new Error(`Failed to login: ${error}`);
       }
     },
-    logOut: (): Viewer => {
+    logOut: (
+      _root: undefined,
+      _args: unknown,
+      { res }: { res: Response }
+    ): Viewer => {
       try {
+        res.clearCookie("viewer", cookiOptions);
         return { didRequest: true };
       } catch (error) {
         throw new Error(`Failed to logout: ${error}`);
