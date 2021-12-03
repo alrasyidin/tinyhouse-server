@@ -66,7 +66,7 @@ export const userResolver: IResolvers = {
 
         return data;
       } catch (error) {
-        throw new Error(`We can't query bookings: ${error}`);
+        throw new Error(`We can't query user bookings: ${error}`);
       }
     },
     listings: async (
@@ -92,7 +92,7 @@ export const userResolver: IResolvers = {
 
         return data;
       } catch (error) {
-        throw new Error(`We can't query listingss: ${error}`);
+        throw new Error(`We can't query user listingss: ${error}`);
       }
     },
   },
