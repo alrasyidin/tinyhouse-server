@@ -19,7 +19,6 @@ export const userResolver: IResolvers = {
     ): Promise<User | null> => {
       try {
         const user = await db.users.findOne({ _id: id });
-        console.log(user);
         if (!user) {
           throw new Error("We can't find user");
         }
@@ -59,7 +58,7 @@ export const userResolver: IResolvers = {
           .find({
             _id: { $in: user.bookings },
           })
-          .skip(page > 0 ? (page - 1) * 10 : 0)
+          .skip(page > 0 ? (page - 1) * limit : 0)
           .limit(limit);
 
         data.total = await bookings.count();
@@ -85,7 +84,7 @@ export const userResolver: IResolvers = {
           .find({
             _id: { $in: user.listings },
           })
-          .skip(page > 0 ? (page - 1) * 10 : 0)
+          .skip(page > 0 ? (page - 1) * limit : 0)
           .limit(limit);
 
         data.total = await listings.count();
