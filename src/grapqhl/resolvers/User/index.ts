@@ -92,7 +92,7 @@ export const userResolver: IResolvers = {
 
         return data;
       } catch (error) {
-        throw new Error(`We can't query user listingss: ${error}`);
+        throw new Error(`We can't query user listings: ${error}`);
       }
     },
   },
