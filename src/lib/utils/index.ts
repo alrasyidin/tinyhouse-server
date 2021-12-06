@@ -13,3 +13,10 @@ export const authorize = async (
 
   return viewer;
 };
+
+export const capitalize = (text: string): string => {
+  return text
+    .split(" ")
+    .map((word) => word[0].toUpperCase() + word.substr(1).toLowerCase())
+    .join(" ");
+};

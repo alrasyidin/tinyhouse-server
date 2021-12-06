@@ -1,14 +1,17 @@
 import { IResolvers } from "apollo-server-express";
 import { Request } from "express";
 import { ObjectId } from "mongodb";
+import { Google } from "../../../lib/api";
+import { Geocoding } from "../../../lib/api/Geocoding";
 import { Database, Listing, ListingsFilter, User } from "../../../lib/types";
-import { authorize } from "../../../lib/utils";
+import { authorize, capitalize } from "../../../lib/utils";
 import {
   ListBookingsArgs,
   ListBookingsData,
   ListingArgs,
   ListingsArgs,
   ListingsData,
+  ListingsQuery,
 } from "./types";
 
 export const listingResolver: IResolvers = {
@@ -38,16 +41,41 @@ export const listingResolver: IResolvers = {
     },
     listings: async (
       _args: undefined,
-      { filter, limit, page }: ListingsArgs,
+      { location, filter, limit, page }: ListingsArgs,
       { db }: { db: Database }
     ): Promise<ListingsData> => {
       try {
+        const query: ListingsQuery = {};
         const data: ListingsData = {
+          region: "",
           total: 0,
           result: [],
         };
 
-        let listings = await db.listings.find();
+        if (location) {
+          const { city, admin, country } = await Geocoding.geocode(location);
+
+          if (city) {
+            query.city = city;
+          }
+
+          if (admin) {
+            query.admin = admin;
+          }
+
+          if (country) {
+            query.country = country;
+          } else {
+            throw new Error("No country found");
+          }
+
+          const cityText = city ? `${capitalize(city)}, ` : "";
+          const adminText = admin ? `${capitalize(admin)}, ` : "";
+          const countryText = capitalize(country);
+          data.region = `${cityText}${adminText}${countryText}`;
+        }
+
+        let listings = await db.listings.find(query);
 
         switch (filter) {
           case ListingsFilter.PRICE_LOW_TO_HIGH:
