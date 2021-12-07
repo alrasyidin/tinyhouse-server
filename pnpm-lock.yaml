@@ -30,6 +30,7 @@ specifiers:
   node-geocoder: ^3.28.0
   nodemon: ^2.0.15
   reflect-metadata: ^0.1.13
+  stripe: ^8.191.0
   ts-node: ^10.4.0
   typescript: ^4.4.4
 
@@ -50,6 +51,7 @@ dependencies:
   mongodb: 3.7.3
   node-geocoder: 3.28.0
   reflect-metadata: 0.1.13
+  stripe: 8.191.0
 
 devDependencies:
   '@types/body-parser': 1.19.2
@@ -3309,6 +3311,14 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
     dev: true
+
+  /stripe/8.191.0:
+    resolution: {integrity: sha512-3oyuIbuW3WDsbGnMUtIZPkr+sOUJ3NEtEwghd81ZuWc+Tq09MrgWXGekbVnbxA3TMFwfKOILw6QoiPA7za4JUg==}
+    engines: {node: ^8.1 || >=10.*}
+    dependencies:
+      '@types/node': 16.11.7
+      qs: 6.7.0
+    dev: false
 
   /subscriptions-transport-ws/0.9.19_graphql@14.7.0:
     resolution: {integrity: sha512-dxdemxFFB0ppCLg10FTtRqH/31FNRL1y1BQv8209MK5I4CwALb7iihQg+7p65lFcIl8MHatINWBLOqpgU4Kyyw==}

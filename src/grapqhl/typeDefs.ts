@@ -5,6 +5,10 @@ export const typeDefs = gql`
     code: String
   }
 
+  input ConnectStripeInput {
+    code: String
+  }
+
   enum ListingType {
     APARTMENT
     HOUSE
@@ -86,5 +90,7 @@ export const typeDefs = gql`
   type Mutation {
     logIn(input: LogInInput): Viewer!
     logOut: Viewer!
+    connectStripe(input: ConnectStripeInput!): Viewer!
+    disconnectStripe: Viewer!
   }
 `;
