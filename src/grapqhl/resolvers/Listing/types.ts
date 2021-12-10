@@ -1,4 +1,9 @@
-import { Booking, Listing, ListingsFilter } from "../../../lib/types";
+import {
+  Booking,
+  Listing,
+  ListingsFilter,
+  ListingType,
+} from "../../../lib/types";
 
 export interface ListingArgs {
   id: string;
@@ -31,4 +36,18 @@ export interface ListingsQuery {
   city?: string;
   admin?: string;
   country?: string;
+}
+
+export interface HostListingInput {
+  title: string;
+  description: string;
+  type: ListingType;
+  image: string;
+  address: string;
+  price: number;
+  numOfGuests: number;
+}
+
+export interface HostListingArgs {
+  input: HostListingInput;
 }

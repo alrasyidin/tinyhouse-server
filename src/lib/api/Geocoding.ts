@@ -16,8 +16,7 @@ export const Geocoding = {
   geocode: async (address: string) => {
     try {
       const result: Location[] = await geocoder.geocode({ address });
-      // console.log("address", address);
-      // console.log("result:", result);
+
       const city = result[0] ? result[0].city : null;
       const admin = result[0] ? result[0].state : null;
       const country = result[0] ? result[0].country : null;

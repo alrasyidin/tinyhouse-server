@@ -3,9 +3,17 @@ import { Request } from "express";
 import { ObjectId } from "mongodb";
 import { Google } from "../../../lib/api";
 import { Geocoding } from "../../../lib/api/Geocoding";
-import { Database, Listing, ListingsFilter, User } from "../../../lib/types";
+import {
+  Database,
+  Listing,
+  ListingsFilter,
+  ListingType,
+  User,
+} from "../../../lib/types";
 import { authorize, capitalize } from "../../../lib/utils";
 import {
+  HostListingArgs,
+  HostListingInput,
   ListBookingsArgs,
   ListBookingsData,
   ListingArgs,
@@ -13,6 +21,26 @@ import {
   ListingsData,
   ListingsQuery,
 } from "./types";
+
+const verifyHostListingInput = (input: HostListingInput) => {
+  const { title, description, type, price } = input;
+
+  if (title.length > 100) {
+    throw new Error("listing title must be under 100 characters");
+  }
+
+  if (description.length > 5000) {
+    throw new Error("listing description must be under 5000 characters");
+  }
+
+  if (!Object.values(ListingType).includes(type)) {
+    throw new Error("listing type must be either apartment or house");
+  }
+
+  if (price < 0) {
+    throw new Error("Price must be greater than 0");
+  }
+};
 
 export const listingResolver: IResolvers = {
   Query: {
@@ -105,6 +133,53 @@ export const listingResolver: IResolvers = {
       }
     },
   },
+  Mutation: {
+    hostListing: async (
+      _root = undefined,
+      { input }: HostListingArgs,
+      { db, req }: { db: Database; req: Request }
+    ): Promise<Listing> => {
+      verifyHostListingInput(input);
+
+      const viewer = await authorize(db, req);
+
+      if (!viewer) {
+        throw new Error("viewer cannot be found");
+      }
+
+      const { country, admin, city } = await Geocoding.geocode(input.address);
+
+      if (!country || !admin || !city) {
+        throw new Error("invalid address input");
+      }
+
+      const insertResult = await db.listings.insertOne({
+        _id: new ObjectId(),
+        ...input,
+        bookings: [],
+        bookingsIndex: {},
+        country,
+        admin,
+        city,
+        host: viewer._id,
+      });
+
+      const insertListing: Listing = insertResult.ops[0];
+
+      db.users.updateOne(
+        {
+          _id: viewer._id,
+        },
+        {
+          $push: {
+            listings: insertListing._id,
+          },
+        }
+      );
+
+      return insertListing;
+    },
+  },
   Listing: {
     id: (listing: Listing): string => {
       return listing._id.toString();
@@ -115,7 +190,6 @@ export const listingResolver: IResolvers = {
       { db }: { db: Database }
     ): Promise<User> => {
       const data = await db.users.findOne({ _id: listing.host });
-      console.log("host", data);
       if (!data) {
         throw new Error("Host can't be found");
       }

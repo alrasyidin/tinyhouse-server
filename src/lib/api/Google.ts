@@ -67,7 +67,6 @@ export const Google = {
           key: `${process.env.G_GEOCODE_KEY}`,
         },
       });
-      console.log(res);
 
       if (res.status < 200 || res.status > 299) {
         throw new Error("Failed to geocode address");

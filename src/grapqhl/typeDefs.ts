@@ -6,7 +6,17 @@ export const typeDefs = gql`
   }
 
   input ConnectStripeInput {
-    code: String
+    code: String!
+  }
+
+  input HostListingInput {
+    title: String!
+    description: String!
+    type: ListingType!
+    image: String!
+    address: String!
+    price: Int!
+    numOfGuests: Int!
   }
 
   enum ListingType {
@@ -92,5 +102,6 @@ export const typeDefs = gql`
     logOut: Viewer!
     connectStripe(input: ConnectStripeInput!): Viewer!
     disconnectStripe: Viewer!
+    hostListing(input: HostListingInput): Listing!
   }
 `;
