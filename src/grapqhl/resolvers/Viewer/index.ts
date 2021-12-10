@@ -59,7 +59,7 @@ const logInViaGoogle = async (
       },
     },
     {
-      returnOriginal: false,
+      returnDocument: "after",
     }
   );
   let viewer = updateRes.value;
@@ -103,7 +103,7 @@ const logInViaCookie = async (
       },
     },
     {
-      returnOriginal: false,
+      returnDocument: "after",
     }
   );
 
@@ -197,7 +197,7 @@ export const viewerResolvers: IResolvers = {
             },
           },
           {
-            returnOriginal: false,
+            returnDocument: "after",
           }
         );
 
@@ -240,7 +240,7 @@ export const viewerResolvers: IResolvers = {
             },
           },
           {
-            returnOriginal: false,
+            returnDocument: "after",
           }
         );
 
