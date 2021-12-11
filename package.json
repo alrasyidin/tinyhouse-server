@@ -21,10 +21,8 @@
         "express": "^4.17.1",
         "googleapis": "^91.0.0",
         "graphql": "^14",
-        "locationiq": "^0.0.3",
         "lodash.merge": "^4.6.2",
         "mongodb": "^3",
-        "node-geocoder": "^3.28.0",
         "reflect-metadata": "^0.1.13",
         "stripe": "^8.191.0"
     },
@@ -37,7 +35,6 @@
         "@types/lodash.merge": "^4.6.6",
         "@types/mongodb": "^3",
         "@types/node": "^16.11.7",
-        "@types/node-geocoder": "^3.24.3",
         "@typescript-eslint/eslint-plugin": "^5.4.0",
         "@typescript-eslint/parser": "^5.4.0",
         "eslint": "^8.2.0",

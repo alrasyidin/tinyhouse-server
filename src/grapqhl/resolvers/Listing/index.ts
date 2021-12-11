@@ -45,7 +45,7 @@ const verifyHostListingInput = (input: HostListingInput) => {
 export const listingResolver: IResolvers = {
   Query: {
     listing: async (
-      listing: Listing,
+      _root: undefined,
       { id }: ListingArgs,
       { db, req }: { db: Database; req: Request }
     ): Promise<Listing | null> => {
@@ -59,7 +59,7 @@ export const listingResolver: IResolvers = {
         const viewer = await authorize(db, req);
 
         if (viewer && viewer._id === data.host) {
-          listing.authorized = true;
+          data.authorized = true;
         }
 
         return data;
@@ -68,7 +68,7 @@ export const listingResolver: IResolvers = {
       }
     },
     listings: async (
-      _args: undefined,
+      _root: undefined,
       { location, filter, limit, page }: ListingsArgs,
       { db }: { db: Database }
     ): Promise<ListingsData> => {
@@ -84,15 +84,15 @@ export const listingResolver: IResolvers = {
           const { city, admin, country } = await Geocoding.geocode(location);
 
           if (city) {
-            query.city = city;
+            query.city = capitalize(city);
           }
 
           if (admin) {
-            query.admin = admin;
+            query.admin = capitalize(admin);
           }
 
           if (country) {
-            query.country = country;
+            query.country = capitalize(country);
           } else {
             throw new Error("No country found");
           }
@@ -101,6 +101,7 @@ export const listingResolver: IResolvers = {
           const adminText = admin ? `${capitalize(admin)}, ` : "";
           const countryText = capitalize(country);
           data.region = `${cityText}${adminText}${countryText}`;
+          console.log(data.region);
         }
 
         let listings = await db.listings.find(query);
@@ -138,46 +139,50 @@ export const listingResolver: IResolvers = {
       _root = undefined,
       { input }: HostListingArgs,
       { db, req }: { db: Database; req: Request }
-    ): Promise<Listing> => {
-      verifyHostListingInput(input);
+    ): Promise<Listing | null> => {
+      try {
+        verifyHostListingInput(input);
 
-      const viewer = await authorize(db, req);
+        const viewer = await authorize(db, req);
 
-      if (!viewer) {
-        throw new Error("viewer cannot be found");
-      }
-
-      const { country, admin, city } = await Geocoding.geocode(input.address);
-
-      if (!country || !admin || !city) {
-        throw new Error("invalid address input");
-      }
-
-      const insertResult = await db.listings.insertOne({
-        _id: new ObjectId(),
-        ...input,
-        bookings: [],
-        bookingsIndex: {},
-        country,
-        admin,
-        city,
-        host: viewer._id,
-      });
-
-      const insertListing: Listing = insertResult.ops[0];
-
-      db.users.updateOne(
-        {
-          _id: viewer._id,
-        },
-        {
-          $push: {
-            listings: insertListing._id,
-          },
+        if (!viewer) {
+          throw new Error("viewer cannot be found");
         }
-      );
 
-      return insertListing;
+        const { country, admin, city } = await Geocoding.geocode(input.address);
+
+        if (!country || !admin || !city) {
+          throw new Error("invalid address input");
+        }
+
+        const insertResult = await db.listings.insertOne({
+          _id: new ObjectId(),
+          ...input,
+          bookings: [],
+          bookingsIndex: {},
+          country,
+          admin,
+          city,
+          host: viewer._id,
+        });
+
+        const insertListing: Listing = insertResult.ops[0];
+
+        db.users.updateOne(
+          {
+            _id: viewer._id,
+          },
+          {
+            $push: {
+              listings: insertListing._id,
+            },
+          }
+        );
+
+        return insertListing;
+      } catch (error) {
+        throw new Error(`Failed to create a new host listing: ${error}`);
+      }
     },
   },
   Listing: {
