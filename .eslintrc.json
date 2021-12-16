@@ -10,6 +10,9 @@
     "env": {
         "node": true
     },
+    "ignorePatterns": [
+        "build/**/*"
+    ],
     "rules": {
         "indent": "off",
         "@typescript-eslint/indent": "off"
