@@ -23,7 +23,7 @@ export const Stripe = {
         currency: "usd",
         amount: price,
         source,
-        application_fee_amount: price * 0.05,
+        application_fee_amount: Math.round(price * 0.05),
       },
       {
         stripeAccount,

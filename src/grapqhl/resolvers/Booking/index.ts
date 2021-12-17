@@ -92,13 +92,13 @@ export const bookingResolver: IResolvers = {
         // get total price to charge
         const totalPrice =
           listing.price *
-          ((checkOutDate.getTime() - checkInDate.getTime()) *
+          ((checkOutDate.getTime() - checkInDate.getTime()) /
             (1000 * 60 * 60 * 24) +
             1);
 
         // get user document of host of listing
         const host = await db.users.findOne({
-          _id: viewer._id,
+          _id: listing.host,
         });
 
         if (!host || !host.walletId) {
@@ -142,6 +142,7 @@ export const bookingResolver: IResolvers = {
 
         return insertedBooking;
       } catch (error) {
+        console.error(error);
         throw new Error(`Failed to create a booking: ${error}`);
       }
     },
