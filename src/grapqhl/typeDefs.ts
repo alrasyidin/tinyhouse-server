@@ -19,6 +19,13 @@ export const typeDefs = gql`
     numOfGuests: Int!
   }
 
+  input CreateBookingInput {
+    id: ID!
+    source: String!
+    checkIn: String!
+    checkOut: String!
+  }
+
   enum ListingType {
     APARTMENT
     HOUSE
@@ -103,5 +110,6 @@ export const typeDefs = gql`
     connectStripe(input: ConnectStripeInput!): Viewer!
     disconnectStripe: Viewer!
     hostListing(input: HostListingInput): Listing!
+    createBooking(input: CreateBookingInput!): String!
   }
 `;
