@@ -36,7 +36,6 @@ export const userResolver: IResolvers = {
     },
   },
   User: {
-    id: (user: User) => user.id,
     hasWallet: (user: User) => Boolean(user.walletId),
     income: (user: User) => (user.authorized ? user.income : null),
     bookings: async (
