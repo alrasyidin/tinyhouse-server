@@ -1,4 +1,5 @@
-import { ObjectId, Collection } from "mongodb";
+import { Repository } from "typeorm";
+import { BookingEntity, ListingEntity, UserEntity } from "../database/entitry";
 
 export enum ListingType {
   Apartment = "APARTMENT",
@@ -11,7 +12,7 @@ export enum ListingsFilter {
 }
 
 export interface Viewer {
-  _id?: string;
+  id?: string;
   token?: string;
   avatar?: string;
   walletId?: string;
@@ -31,15 +32,15 @@ export interface BookingsIndex {
 }
 
 export interface Booking {
-  _id: ObjectId;
-  listing: ObjectId;
+  id: string;
+  listing: string;
   tenant: string;
   checkIn: string;
   checkOut: string;
 }
 
 export interface Listing {
-  _id: ObjectId;
+  id: string;
   title: string;
   description: string;
   image: string;
@@ -49,7 +50,7 @@ export interface Listing {
   country: string;
   admin: string;
   city: string;
-  bookings: ObjectId[];
+  bookings: string[];
   bookingsIndex: BookingsIndex;
   price: number;
   numOfGuests: number;
@@ -57,20 +58,20 @@ export interface Listing {
 }
 
 export interface User {
-  _id: string;
+  id: string;
   name: string;
   token: string;
   avatar: string;
   contact: string;
   walletId?: string;
   income: number;
-  bookings: ObjectId[];
-  listings: ObjectId[];
+  bookings: string[];
+  listings: string[];
   authorized?: boolean;
 }
 
 export interface Database {
-  listings: Collection<Listing>;
-  users: Collection<User>;
-  bookings: Collection<Booking>;
+  listings: Repository<ListingEntity>;
+  users: Repository<UserEntity>;
+  bookings: Repository<BookingEntity>;
 }
