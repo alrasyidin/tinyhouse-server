@@ -1,5 +1,7 @@
 import "dotenv/config";
 
+import "reflect-metadata";
+
 import { typeDefs, resolvers } from "./grapqhl";
 
 import { ApolloServer } from "apollo-server-express";
