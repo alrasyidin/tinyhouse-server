@@ -32,8 +32,10 @@
         "lodash.merge": "^4.6.2",
         "mongodb": "^3",
         "multer": "^1.4.4",
+        "pg": "^8.7.1",
         "reflect-metadata": "^0.1.13",
         "stripe": "^8.191.0",
+        "typeorm": "^0.2.41",
         "validator": "^13.7.0"
     },
     "devDependencies": {
