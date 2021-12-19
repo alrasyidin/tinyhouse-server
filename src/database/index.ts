@@ -2,10 +2,15 @@ import { MongoClient } from "mongodb";
 import { Booking, Database, Listing, User } from "../lib/types";
 
 // mongo atlas
-const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_USER_PASSWORD}@${process.env.DB_CLUSTER}.sktvo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+let url = "";
+
+if (process.env.NODE_ENV === "production") {
+  url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_USER_PASSWORD}@${process.env.DB_CLUSTER}.sktvo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+} else {
+  url = `mongodb://localhost:27017`;
+}
 
 // local
-// const url = `mongodb://localhost:27017`;
 
 export const connectDatabase = async (): Promise<Database> => {
   const client = await MongoClient.connect(url, {
