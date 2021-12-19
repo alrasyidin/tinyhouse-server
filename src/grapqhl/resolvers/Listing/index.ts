@@ -1,9 +1,9 @@
+import crypto from "crypto";
 import { IResolvers } from "apollo-server-express";
 
 import { Cloudinary } from "../../../lib/api/Cloudinary";
 
 import { Request } from "express";
-import { ObjectId } from "mongodb";
 // import { Google } from "../../../lib/api";
 import { Geocoding } from "../../../lib/api/Geocoding";
 import {
@@ -23,6 +23,7 @@ import {
   ListingsArgs,
   ListingsData,
   ListingsQuery,
+  Order,
 } from "./types";
 
 const verifyHostListingInput = (input: HostListingInput) => {
@@ -53,19 +54,19 @@ export const listingResolver: IResolvers = {
       { db, req }: { db: Database; req: Request }
     ): Promise<Listing | null> => {
       try {
-        const data = await db.listings.findOne({ _id: new ObjectId(id) });
+        const listing = (await db.listings.findOne({ id })) as Listing;
 
-        if (!data) {
+        if (!listing) {
           throw new Error("Can't return listing data");
         }
 
         const viewer = await authorize(db, req);
 
-        if (viewer && viewer._id === data.host) {
-          data.authorized = true;
+        if (viewer && viewer.id === listing.host) {
+          listing.authorized = true;
         }
 
-        return data;
+        return listing;
       } catch (error) {
         throw new Error(`Failed to query listing: ${error}`);
       }
@@ -104,32 +105,28 @@ export const listingResolver: IResolvers = {
           const adminText = admin ? `${capitalize(admin)}, ` : "";
           const countryText = capitalize(country);
           data.region = `${cityText}${adminText}${countryText}`;
-          console.log(data.region);
         }
 
-        let listings = await db.listings.find(query);
+        let order: Order | null = null;
 
-        switch (filter) {
-          case ListingsFilter.PRICE_LOW_TO_HIGH:
-            listings = listings.sort({ price: 1 });
-            break;
-
-          case ListingsFilter.PRICE_HIGH_TO_LOW:
-            listings = listings.sort({ price: -1 });
-            break;
-
-          default:
-            throw new Error(
-              "The specified filter listing not match any filters"
-            );
+        if (filter && filter === ListingsFilter.PRICE_LOW_TO_HIGH) {
+          order = { price: "ASC" };
         }
 
-        listings = listings
-          .skip(page > 0 ? (page - 1) * limit : 0)
-          .limit(limit);
+        if (filter && filter === ListingsFilter.PRICE_HIGH_TO_LOW) {
+          order = { price: "DESC" };
+        }
 
-        data.total = await listings.count();
-        data.result = await listings.toArray();
+        const count = await db.listings.count(query);
+        const listings = await db.listings.find({
+          where: { ...query },
+          order: { ...order },
+          skip: page > 0 ? (page - 1) * limit : 0,
+          take: limit,
+        });
+
+        data.total = count;
+        data.result = listings;
 
         return data;
       } catch (error) {
@@ -159,8 +156,9 @@ export const listingResolver: IResolvers = {
         }
 
         const imageUrl = await Cloudinary.upload(input.image);
-        const insertResult = await db.listings.insertOne({
-          _id: new ObjectId(),
+
+        const newListing: Listing = {
+          id: crypto.randomBytes(16).toString("hex"),
           ...input,
           image: imageUrl,
           bookings: [],
@@ -168,42 +166,30 @@ export const listingResolver: IResolvers = {
           country,
           admin,
           city,
-          host: viewer._id,
-        });
+          host: viewer.id,
+        };
+        const result = await db.listings.create(newListing).save();
 
-        const insertListing: Listing = insertResult.ops[0];
+        viewer.listings.push(result.id);
+        await viewer.save();
 
-        db.users.updateOne(
-          {
-            _id: viewer._id,
-          },
-          {
-            $push: {
-              listings: insertListing._id,
-            },
-          }
-        );
-
-        return insertListing;
+        return result as Listing;
       } catch (error) {
         throw new Error(`Failed to create a new host listing: ${error}`);
       }
     },
   },
   Listing: {
-    id: (listing: Listing): string => {
-      return listing._id.toString();
-    },
     host: async (
       listing: Listing,
       _args: undefined,
       { db }: { db: Database }
     ): Promise<User> => {
-      const data = await db.users.findOne({ _id: listing.host });
+      const data = await db.users.findOne({ id: listing.host });
       if (!data) {
         throw new Error("Host can't be found");
       }
-      return data;
+      return data as User;
     },
     bookingsIndex: (listing: Listing): string => {
       return JSON.stringify(listing.bookingsIndex);
@@ -223,15 +209,13 @@ export const listingResolver: IResolvers = {
           result: [],
         };
 
-        const bookings = await db.bookings
-          .find({
-            _id: { $in: listing.bookings },
-          })
-          .skip(page > 0 ? (page - 1) * limit : 0)
-          .limit(limit);
+        const bookings = await db.bookings.findByIds(listing.bookings, {
+          skip: page > 0 ? (page - 1) * limit : 0,
+          take: limit,
+        });
 
-        data.total = await bookings.count();
-        data.result = await bookings.toArray();
+        data.total = listing.bookings.length;
+        data.result = bookings;
 
         return data;
       } catch (error) {
