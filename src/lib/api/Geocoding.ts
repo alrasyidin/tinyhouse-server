@@ -7,7 +7,7 @@ const axios: AxiosInstance = axiosLib.create();
 
 const provider: MapQuestProvider = new MapQuestProvider(
   axios,
-  process.env.MAPQUEST_CONSUMER_KEY || ""
+  `${process.env.MAPQUEST_CONSUMER_KEY}`
 );
 
 const geocoder: Geocoder = new Geocoder(provider);
