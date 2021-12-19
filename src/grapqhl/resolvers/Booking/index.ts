@@ -1,4 +1,5 @@
 import { Request } from "express";
+import crypto from "crypto";
 import { IResolvers } from "apollo-server-express";
 import {
   Booking,
@@ -62,7 +63,7 @@ export const bookingResolver: IResolvers = {
 
         // find listing document that being booked
         const listing = await db.listings.findOne({
-          _id: new ObjectId(id),
+          id,
         });
 
         if (!listing) {
@@ -70,7 +71,7 @@ export const bookingResolver: IResolvers = {
         }
 
         // check if viewer not booking their own listing
-        if (listing.host === viewer._id) {
+        if (listing.host === viewer.id) {
           throw new Error("viewer can't book own listing");
         }
 
@@ -117,7 +118,7 @@ export const bookingResolver: IResolvers = {
 
         // get user document of host of listing
         const host = await db.users.findOne({
-          _id: listing.host,
+          id: listing.host,
         });
 
         if (!host || !host.walletId) {
@@ -130,36 +131,29 @@ export const bookingResolver: IResolvers = {
         await Stripe.charge(totalPrice, source, host.walletId);
 
         // insert a new booking document to listings booking
-        const insertRes = await db.bookings.insertOne({
-          _id: new ObjectId(),
-          listing: listing._id,
-          tenant: viewer._id,
+        const newBooking: Booking = {
+          id: crypto.randomBytes(16).toString("hex"),
+          listing: listing.id,
+          tenant: viewer.id,
           checkIn,
           checkOut,
-        });
-        const insertedBooking: Booking = insertRes.ops[0];
+        };
+        const insertBooking = await db.bookings.create(newBooking).save();
 
         // update user of host to increment income
-        db.users.updateOne({ _id: host._id }, { $inc: { income: totalPrice } });
+        host.income += totalPrice;
+        await host.save();
 
         // update booking field of tenant
-        db.users.updateOne(
-          { _id: viewer._id },
-          {
-            $push: { bookings: insertedBooking._id },
-          }
-        );
+        viewer.bookings.push(insertBooking.id);
+        await viewer.save();
 
         // update bookings field of listing document
-        db.listings.updateOne(
-          { _id: listing._id },
-          {
-            $set: { bookingsIndex },
-            $push: { bookings: insertedBooking._id },
-          }
-        );
+        listing.bookingsIndex = bookingsIndex;
+        listing.bookings.push(insertBooking.id);
+        await listing.save();
 
-        return insertedBooking;
+        return insertBooking as Booking;
       } catch (error) {
         console.error(error);
         throw new Error(`Failed to create a booking: ${error}`);
@@ -167,22 +161,19 @@ export const bookingResolver: IResolvers = {
     },
   },
   Booking: {
-    id: (booking: Booking): string => {
-      return booking._id.toString();
-    },
     listing: async (
       booking: Booking,
       args: undefined,
       { db }: { db: Database }
     ): Promise<Listing | null> => {
-      return await db.listings.findOne({ _id: booking.listing });
+      return (await db.listings.findOne({ id: booking.listing })) as Listing;
     },
     tenant: async (
       booking: Booking,
       args: undefined,
       { db }: { db: Database }
     ): Promise<User | null> => {
-      return await db.users.findOne({ _id: booking.tenant });
+      return (await db.users.findOne({ id: booking.tenant })) as User;
     },
   },
 };
