@@ -139,7 +139,7 @@ export const listingResolver: IResolvers = {
   },
   Mutation: {
     hostListing: async (
-      _root = undefined,
+      _root: undefined,
       { input }: HostListingArgs,
       { db, req }: { db: Database; req: Request }
     ): Promise<Listing | null> => {
@@ -157,6 +157,7 @@ export const listingResolver: IResolvers = {
         if (!country || !admin || !city) {
           throw new Error("invalid address input");
         }
+
         const imageUrl = await Cloudinary.upload(input.image);
         const insertResult = await db.listings.insertOne({
           _id: new ObjectId(),

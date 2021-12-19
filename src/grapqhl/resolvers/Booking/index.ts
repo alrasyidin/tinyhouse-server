@@ -75,8 +75,27 @@ export const bookingResolver: IResolvers = {
         }
 
         // check that checkOut NOT prior checkIn
+        const MILISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+
+        const today = new Date();
         const checkInDate = new Date(checkIn);
         const checkOutDate = new Date(checkOut);
+
+        if (
+          checkInDate.getTime() >
+          today.getTime() * 30 * MILISECONDS_PER_DAY
+        ) {
+          throw new Error("check in date can't be more than 30 day from today");
+        }
+
+        if (
+          checkOutDate.getTime() >
+          today.getTime() * 30 * MILISECONDS_PER_DAY
+        ) {
+          throw new Error(
+            "check out date can't be more than 30 day from today"
+          );
+        }
 
         if (checkOutDate < checkInDate) {
           throw new Error("check out date can't before check in date");
