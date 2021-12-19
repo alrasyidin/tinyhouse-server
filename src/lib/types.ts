@@ -1,5 +1,5 @@
 import { Repository } from "typeorm";
-import { BookingEntity, ListingEntity, UserEntity } from "../database/entitry";
+import { BookingEntity, ListingEntity, UserEntity } from "../database/entity";
 
 export enum ListingType {
   Apartment = "APARTMENT",
@@ -15,7 +15,7 @@ export interface Viewer {
   id?: string;
   token?: string;
   avatar?: string;
-  walletId?: string;
+  walletId?: string | null;
   didRequest: boolean;
 }
 
