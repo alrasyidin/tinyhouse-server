@@ -18,14 +18,14 @@ export const userResolver: IResolvers = {
       { db, req }: { db: Database; req: Request }
     ): Promise<User | null> => {
       try {
-        const user = await db.users.findOne({ _id: id });
+        const user = (await db.users.findOne({ id })) as User;
         if (!user) {
           throw new Error("We can't find user");
         }
 
         const viewer = await authorize(db, req);
 
-        if (viewer && viewer._id === user._id) {
+        if (viewer && viewer.id === user.id) {
           user.authorized = true;
         }
 
@@ -36,7 +36,7 @@ export const userResolver: IResolvers = {
     },
   },
   User: {
-    id: (user: User) => user._id,
+    id: (user: User) => user.id,
     hasWallet: (user: User) => Boolean(user.walletId),
     income: (user: User) => (user.authorized ? user.income : null),
     bookings: async (
@@ -54,15 +54,20 @@ export const userResolver: IResolvers = {
           result: [],
         };
 
-        const bookings = await db.bookings
-          .find({
-            _id: { $in: user.bookings },
-          })
-          .skip(page > 0 ? (page - 1) * limit : 0)
-          .limit(limit);
+        // const bookings = await db.bookings
+        //   .find({
+        //     id: { $in: user.bookings },
+        //   })
+        //   .skip(page > 0 ? (page - 1) * limit : 0)
+        //   .limit(limit);
 
-        data.total = await bookings.count();
-        data.result = await bookings.toArray();
+        const bookings = await db.bookings.findByIds(user.bookings, {
+          skip: page > 0 ? (page - 1) * limit : 0,
+          take: limit,
+        });
+
+        data.total = user.bookings.length;
+        data.result = bookings;
 
         return data;
       } catch (error) {
@@ -80,15 +85,20 @@ export const userResolver: IResolvers = {
           result: [],
         };
 
-        const listings = await db.listings
-          .find({
-            _id: { $in: user.listings },
-          })
-          .skip(page > 0 ? (page - 1) * limit : 0)
-          .limit(limit);
+        // const listings = await db.listings
+        //   .find({
+        //     id: { $in: user.listings },
+        //   })
+        //   .skip(page > 0 ? (page - 1) * limit : 0)
+        //   .limit(limit);
 
-        data.total = await listings.count();
-        data.result = await listings.toArray();
+        const listings = await db.listings.findByIds(user.listings, {
+          skip: page > 0 ? (page - 1) * limit : 0,
+          take: limit,
+        });
+
+        data.total = user.listings.length;
+        data.result = listings;
 
         return data;
       } catch (error) {
