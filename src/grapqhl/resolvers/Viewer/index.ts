@@ -110,7 +110,7 @@ const logInViaCookie = async (
 ): Promise<User | undefined> => {
   const updateRes = await db.users.findOneAndUpdate(
     {
-      _id: req.signedCookies.viewer,
+      _id: req.session.viewer,
     },
     {
       $set: {
