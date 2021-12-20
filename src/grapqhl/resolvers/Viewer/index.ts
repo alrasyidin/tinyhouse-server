@@ -7,22 +7,30 @@ import { ConnectStripeArgs, LogInArgs } from "./types";
 import { CookieOptions, Request, Response } from "express";
 import { authorize } from "../../../lib/utils";
 import { Stripe } from "../../../lib/api/Stripe";
+import { Session } from "express-session";
 
-const cookiOptions: CookieOptions = {
-  httpOnly: true,
-  sameSite: "none",
-  signed: true,
-  secure: process.env.NODE_ENV === "production",
-};
-
-if (process.env.NODE_ENV === "production") {
-  cookiOptions.domain = ".vercel.app";
+declare module "express-session" {
+  interface SessionData {
+    viewer: string;
+  }
 }
+
+// const cookiOptions: CookieOptions = {
+//   httpOnly: true,
+//   sameSite: "none",
+//   signed: true,
+//   secure: process.env.NODE_ENV === "production",
+// };
+
+// if (process.env.NODE_ENV === "production") {
+//   cookiOptions.domain = ".vercel.app";
+// }
 
 const logInViaGoogle = async (
   code: string,
   token: string,
   db: Database,
+  req: Request,
   res: Response
 ): Promise<User | undefined> => {
   const { user } = await Google.login(code);
@@ -84,10 +92,12 @@ const logInViaGoogle = async (
     viewer = insertRes.ops[0];
   }
 
-  res.cookie("viewer", userId, {
-    ...cookiOptions,
-    maxAge: 365 * 24 * 60 * 60 * 1000,
-  });
+  // res.cookie("viewer", userId, {
+  //   ...cookiOptions,
+  //   maxAge: 365 * 24 * 60 * 60 * 1000,
+  // });
+
+  req.session.viewer = userId;
 
   return viewer;
 };
@@ -115,7 +125,8 @@ const logInViaCookie = async (
   const viewer = updateRes.value;
 
   if (!viewer) {
-    res.clearCookie("viewer", cookiOptions);
+    req.session.viewer = "";
+    // res.clearCookie("viewer", cookiOptions);
   }
 
   return viewer;
@@ -142,7 +153,7 @@ export const viewerResolvers: IResolvers = {
         const token = crypto.randomBytes(16).toString("hex");
 
         const viewer: User | undefined = code
-          ? await logInViaGoogle(code, token, db, res)
+          ? await logInViaGoogle(code, token, db, req, res)
           : await logInViaCookie(token, db, req, res);
 
         if (!viewer) {
@@ -163,10 +174,11 @@ export const viewerResolvers: IResolvers = {
     logOut: (
       _root: undefined,
       _args: unknown,
-      { res }: { res: Response }
+      { req }: { req: Request }
     ): Viewer => {
       try {
-        res.clearCookie("viewer", cookiOptions);
+        req.session.viewer = "";
+        // res.clearCookie("viewer", cookiOptions);
         return { didRequest: true };
       } catch (error) {
         throw new Error(`Failed to logout: ${error}`);
