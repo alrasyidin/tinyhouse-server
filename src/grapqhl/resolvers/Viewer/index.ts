@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-import { IResolvers } from ".pnpm/graphql-tools@4.0.8_graphql@14.7.0/node_modules/graphql-tools";
+import { IResolvers } from "apollo-server-express";
 import { Google } from "../../../lib/api";
 import { Database, User, Viewer } from "../../../lib/types";
 import { ConnectStripeArgs, LogInArgs } from "./types";
