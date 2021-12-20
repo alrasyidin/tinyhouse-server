@@ -19,7 +19,7 @@ const cookieOptions: CookieOptions = {
   sameSite: "none",
   secure: process.env.NODE_ENV === "production",
   maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year,
-  domain: "tinyhouse-client.vercel.app",
+  domain: ".herokuapp.com",
 };
 
 const corsOptions = {
