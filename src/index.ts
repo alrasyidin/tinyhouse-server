@@ -34,6 +34,7 @@ const mount = async (app: Application) => {
 
   const apolloServer = new ApolloServer({
     introspection: true,
+    playground: true,
     typeDefs,
     resolvers,
     context: ({ res, req }) => ({ db, res, req }),
