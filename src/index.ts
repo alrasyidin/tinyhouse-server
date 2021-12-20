@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { typeDefs, resolvers } from "./grapqhl";
 
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer, CorsOptions } from "apollo-server-express";
 
 import express, { Application, CookieOptions } from "express";
 import { connectDatabase } from "./database";
@@ -22,12 +22,13 @@ const cookieOptions: CookieOptions = {
   domain: ".herokuapp.com",
 };
 
-const corsOptions = {
+const corsOptions: CorsOptions = {
   credentials: true,
   origin:
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000"
       : "https://tinyhouse-client.vercel.app",
+  allowedHeaders: ["Content-Type", "Authorization", "set-cookie"],
 };
 
 const mount = async (app: Application) => {
