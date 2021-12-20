@@ -10,7 +10,7 @@ import { Stripe } from "../../../lib/api/Stripe";
 
 const cookiOptions = {
   httpOnly: true,
-  sameSite: true,
+  sameSite: false,
   signed: true,
   secure: process.env.NODE_ENV === "development" ? false : true,
 };
