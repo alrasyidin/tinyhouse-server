@@ -33,6 +33,7 @@ const mount = async (app: Application) => {
   );
 
   const apolloServer = new ApolloServer({
+    introspection: true,
     typeDefs,
     resolvers,
     context: ({ res, req }) => ({ db, res, req }),
