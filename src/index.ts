@@ -50,7 +50,7 @@ const mount = async (app: Application) => {
     context: ({ res, req }) => ({ db, res, req }),
   });
 
-  apolloServer.applyMiddleware({ app, path: "/api" });
+  apolloServer.applyMiddleware({ app, path: "/api", cors: corsOptions });
 
   app.listen(process.env.PORT);
 
