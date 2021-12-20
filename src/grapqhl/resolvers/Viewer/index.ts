@@ -16,7 +16,7 @@ const cookiOptions: CookieOptions = {
 };
 
 if (process.env.NODE_ENV === "production") {
-  cookiOptions.domain = ".herokuapp.com";
+  cookiOptions.domain = ".vercel.app";
 }
 
 const logInViaGoogle = async (
