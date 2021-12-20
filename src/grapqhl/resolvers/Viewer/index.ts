@@ -16,7 +16,7 @@ const cookiOptions: CookieOptions = {
 };
 
 if (process.env.NODE_ENV === "production") {
-  cookiOptions.domain = process.env.PUBLIC_URL;
+  cookiOptions.domain = ".herokuapp.com";
 }
 
 const logInViaGoogle = async (
