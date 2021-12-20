@@ -7,8 +7,10 @@
     "private": "true",
     "main": "src/index.ts",
     "scripts": {
-        "start": "nodemon --exec ts-node src/index.ts",
+        "start": "node build/index.js",
+        "start:typescript": "nodemon --exec ts-node src/index.ts",
         "build": "tsc -p .",
+        "postinstall": "tsc -p .",
         "seed": "ts-node ./temp/seed.ts",
         "clear": "ts-node ./temp/clear.ts",
         "lint": "eslint ./src/**/*.ts",
