@@ -28,7 +28,7 @@ const corsOptions: CorsOptions = {
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000"
       : "https://tinyhouse-client.vercel.app",
-  allowedHeaders: ["Content-Type", "Authorization", "set-cookie"],
+  allowedHeaders: ["Content-Type", "Authorization", "Set-Cookie"],
 };
 
 const mount = async (app: Application) => {
