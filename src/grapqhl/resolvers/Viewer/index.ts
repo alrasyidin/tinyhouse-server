@@ -15,6 +15,10 @@ const cookiOptions: CookieOptions = {
   secure: process.env.NODE_ENV === "development" ? false : true,
 };
 
+if (process.env.NODE_ENV === "production") {
+  cookiOptions.domain = process.env.PUBLIC_URL;
+}
+
 const logInViaGoogle = async (
   code: string,
   token: string,
