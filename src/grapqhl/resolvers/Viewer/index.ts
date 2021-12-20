@@ -4,13 +4,13 @@ import { IResolvers } from "apollo-server-express";
 import { Google } from "../../../lib/api";
 import { Database, User, Viewer } from "../../../lib/types";
 import { ConnectStripeArgs, LogInArgs } from "./types";
-import { Request, Response } from "express";
+import { CookieOptions, Request, Response } from "express";
 import { authorize } from "../../../lib/utils";
 import { Stripe } from "../../../lib/api/Stripe";
 
-const cookiOptions = {
+const cookiOptions: CookieOptions = {
   httpOnly: true,
-  sameSite: false,
+  sameSite: "none",
   signed: true,
   secure: process.env.NODE_ENV === "development" ? false : true,
 };
