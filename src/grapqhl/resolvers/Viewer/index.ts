@@ -12,6 +12,7 @@ const cookiOptions = {
   httpOnly: true,
   sameSite: true,
   signed: true,
+  secure: process.env.NODE_ENV === "development" ? false : true,
 };
 
 const logInViaGoogle = async (
