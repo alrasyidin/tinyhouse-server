@@ -14,7 +14,10 @@ import cors from "cors";
 
 const corsOptions = {
   credentials: true,
-  origin: process.env.PUBLIC_URL,
+  origin:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://tinyhouse-client.vercel.app",
 };
 
 const mount = async (app: Application) => {
