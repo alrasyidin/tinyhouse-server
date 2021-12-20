@@ -21,6 +21,8 @@ const mount = async (app: Application) => {
   const db = await connectDatabase();
   const upload = multer();
 
+  app.set("trust proxy", 1);
+
   app.use(cors(corsOptions));
   app.use(bodyParser.json({ limit: "2mb" }));
   app.use(cookieParser(process.env.SECRET));

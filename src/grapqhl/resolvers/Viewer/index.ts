@@ -12,7 +12,7 @@ const cookiOptions: CookieOptions = {
   httpOnly: true,
   sameSite: "none",
   signed: true,
-  secure: process.env.NODE_ENV === "development" ? false : true,
+  secure: process.env.NODE_ENV === "production",
 };
 
 if (process.env.NODE_ENV === "production") {
