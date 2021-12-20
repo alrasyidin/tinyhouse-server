@@ -12,11 +12,16 @@ import multer from "multer";
 import compression from "compression";
 import cors from "cors";
 
+const corsOptions = {
+  credentials: true,
+  origin: process.env.PUBLIC_URL,
+};
+
 const mount = async (app: Application) => {
   const db = await connectDatabase();
   const upload = multer();
 
-  app.use(cors());
+  app.use(cors(corsOptions));
   app.use(bodyParser.json({ limit: "2mb" }));
   app.use(cookieParser(process.env.SECRET));
   if (process.env.NODE_ENV === "production") {
