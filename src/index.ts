@@ -24,10 +24,7 @@ const cookieOptions: CookieOptions = {
 
 const corsOptions: CorsOptions = {
   credentials: true,
-  origin:
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:3000"
-      : "https://tinyhouse-client.vercel.app",
+  origin: process.env.PUBLIC_URL,
 };
 
 const mount = async (app: Application) => {
@@ -74,7 +71,7 @@ const mount = async (app: Application) => {
 
   app.listen(process.env.PORT);
 
-  console.log(`Server listen on http://localhost:${process.env.PORT}`);
+  console.log(`Server listen on ${process.env.PUBLIC_URL}:${process.env.PORT}`);
 };
 
 mount(express());
