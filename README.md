@@ -59,8 +59,6 @@ npm start
 
 ### PostgreSQL Integration
 This app can be integrated with postgres database. You just change the branch to `db-postgres` and provide configuration on `ormconfig.json`. Here I use TypeORM library for orm solution.
- 
-Codegen only can be running with after you start the development server. you can start development server base on this guide [here](https://github.com/alrasyidin/tinyhouse-server).
 
 ## Screenshot
 
