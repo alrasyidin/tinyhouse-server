@@ -84,7 +84,7 @@ export const listingResolver: IResolvers = {
         };
 
         if (location) {
-          const { city, admin, country } = await Geocoding.geocode(location);
+          const { city, admin, country } = await Geocoding.geocode(location); // here use mapquest service, if you want use google geocding api you can change to Google.geocode(location)
 
           if (city) {
             query.city = capitalize(city);
