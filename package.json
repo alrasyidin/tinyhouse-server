@@ -7,8 +7,7 @@
     "private": "true",
     "main": "src/index.ts",
     "scripts": {
-        "start": "node build/index.js",
-        "start:typescript": "nodemon --exec ts-node src/index.ts",
+        "start": "nodemon --exec ts-node --transpile-only src/index.ts",
         "build": "tsc -p .",
         "postinstall": "tsc -p .",
         "seed": "ts-node ./temp/seed.ts",

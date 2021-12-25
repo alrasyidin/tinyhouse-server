@@ -16,10 +16,9 @@ export type SessionViewer = Session & { viewer: string };
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
-  sameSite: "none",
+  sameSite: true,
   secure: process.env.NODE_ENV === "production",
   maxAge: 365 * 24 * 60 * 60 * 1000, // 1 year,
-  domain: ".herokuapp.com",
 };
 
 const corsOptions: CorsOptions = {
